@@ -31,7 +31,7 @@ boolean bConnectWiFi (void)
   Serial.print("Connecting to Wi-Fi ");
   WiFi.begin(ssid, pass);
   /* ---- Wait for connection to establish ----*/
-  for (int tries = 0; (WiFi.status() != WL_CONNECTED) && tries < 10; tries++) {
+  for (int tries = 0; (WiFi.status() != WL_CONNECTED) && tries < 20; tries++) {
     delay(500);
     Serial.print(". ");
   }
@@ -48,9 +48,12 @@ boolean bConnectWiFi (void)
 
 void vidStartMDns(void)
 {
-  
   if (!MDNS.begin("esp8266")) {             // Start the mDNS responder for esp8266.local
     Serial.println("Error setting up MDNS responder!");
   }
-  Serial.println("mDNS responder started");
+  else
+  {
+    Serial.println("mDNS responder started");
+    
+  }
 }

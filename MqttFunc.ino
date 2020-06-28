@@ -1,17 +1,21 @@
 
-#include <PubSubClient.h>
+#include <PubSubClient.h> /*https://pubsubclient.knolleary.net/api#state*/
 /*--------Connect-------*/
 #define SERVER          "io.adafruit.com"
 #define SERVERPORT      1883
 #define MQTT_USERNAME   "miaseoud"
 #define MQTT_KEY        ""
-
+/*--------Publish & Subscribe -------*/
+#define USERNAME          "miaseoud/"
+#define PREAMBLE          "feeds/"
+#define ON_OFF_TOPIC         "OnOff"
+#define TOPIC             "TimeTopic"
 
 WiFiClient WiFi_Client;//Creates a client that can connect to to a specified internet IP address and port as defined in client.connect().
 //Creates an uninitialised client instance(MQTT object).
 //Before it can be used, it must be configured with the property setters:
 PubSubClient client(WiFi_Client);//Constructor
-
+extern TimeCheck NonBlock5Sec;
 
 /**********************************************************************************************/
 /*--------Subscribe Action-------*/
@@ -41,49 +45,38 @@ void callback(char* topic, byte * data, unsigned int length)
 }
 
 
-void vidMqttReconnect()
-{
-  // Loop until we're reconnected
-  while (!client.connected())
-  {
-    Serial.print("Attempting MQTT connection...");
-    // Attempt to connect
-    if (client.connect("MqttClient", MQTT_USERNAME, MQTT_KEY))  //connect (clientID, username, password)
-    {
-      Serial.println("connected");
-    }
-    else
-    {
-      Serial.print("failed, rc=");
-      Serial.print(client.state());
-      Serial.println(" try again in 10 seconds");
-      // Wait 5 seconds before retrying
-      delay(10000);
-    }
-  }
-}
-
-
 void vidMqttInit (void)
 {
   client.setServer(SERVER, SERVERPORT);
-  client.subscribe(USERNAME PREAMBLE ON_OFF_TOPIC, 1);
+  //client.subscribe(USERNAME PREAMBLE ON_OFF_TOPIC, 1);
   client.setCallback(callback);
-  while (!client.connected())
+}
+
+void vidMqttConnect()
+{
+  if (!client.connected())
   {
-    Serial.println("Connecting to MQTT . . .");
-    if (client.connect("MqttClient", MQTT_USERNAME, MQTT_KEY))  //connect (clientID, username, password)
+    if (NonBlock5Sec.vidIsItTime())
     {
-      Serial.println("Connected to MQTT server");
-    }
-    else
-    {
-      Serial.print("failed with state ");
-      Serial.print(client.state());
-      delay(2000);
+      Serial.print("Attempting MQTT connection . . . ");
+      // Attempt to connect
+      if (client.connect("", MQTT_USERNAME, MQTT_KEY)) {
+        Serial.println("Connected");
+        // ... and resubscribe
+        client.subscribe(USERNAME PREAMBLE ON_OFF_TOPIC, 1);
+      }
+      else
+      {
+        Serial.println("Failed");
+      }
     }
   }
+else
+{
+  client.loop();
 }
+}
+
 /*
   -4 : MQTT_CONNECTION_TIMEOUT - the server didn't respond within the keepalive time
   -3 : MQTT_CONNECTION_LOST - the network connection was broken
@@ -97,13 +90,3 @@ void vidMqttInit (void)
    5 : MQTT_CONNECT_UNAUTHORIZED - the client was not authorized to connect
 */
 
-
-//    Serial.print ("TimeInMins is:");
-//    Serial.println (TimeInMins);
-//    char valueStr [5];
-//    String str = (String)TimeInMins;
-//    str.toCharArray(valueStr, 5);
-//    Serial.print("Publish Status:");
-//    Serial.println (client.publish(USERNAME PREAMBLE TOPIC, valueStr));
-//    PrevTimeInMins = TimeInMins;
-//    delay(500);

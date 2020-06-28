@@ -13,23 +13,16 @@
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
+#include <WiFiClient.h>
+#include <ESP8266HTTPClient.h>
 /*------------------------MQTT--------------------*/
 #include <PubSubClient.h>
 /*-----------------------------------------------------*/
 #include "NTP.h"
-#define interval  50000
-/*--------Connect-------*/
-#define SERVER          "io.adafruit.com"
-#define SERVERPORT      1883
-#define MQTT_USERNAME   "miaseoud"
-#define MQTT_KEY        ""
-/*--------Publish & Subscribe -------*/
-#define USERNAME          "miaseoud/"
-#define PREAMBLE          "feeds/"
-#define ON_OFF_TOPIC         "OnOff"
-#define TOPIC             "TimeTopic"
+#define interval  5000
+
 unsigned int valueStr[5];
-String OnOffStr ="ON" ;
+String OnOffStr = "ON" ;
 bool OnOffStatus = 0;
 /***********************************************************************************************************************************/
 /*Additional boards manager URL:
@@ -39,11 +32,12 @@ bool OnOffStatus = 0;
 #define bWIFI_CONNECTED 1
 extern PubSubClient client;
 extern ESP8266WebServer server;
-extern TimeCheck NtpRequester;
+extern TimeCheck NonBlock20Sec;
+extern TimeCheck NonBlock5Sec;
 /*************************************************************************************************************************************************************/
 /*------------------------------------------------------------------------ VOID SETUP ------------------------------------------------------------------------*/
 /*************************************************************************************************************************************************************/
-void setup(void) 
+void setup(void)
 {
   Serial.begin(9600); //setup Serial communication
   delay(500);
@@ -54,7 +48,6 @@ void setup(void)
   {
     vidNtpInit();
     vidMqttInit();
-    vidStartMDns();
   }
   /*************************************************************************************/
   /*------------------------------- Create Access Point -------------------------------*/
@@ -64,6 +57,7 @@ void setup(void)
     vidStartAcessPoint();
   }
   /*------------------------------------ Start HTML Web Server for UI ------------------------------------*/
+  vidStartMDns();
   vidWebServerInit();
 }
 /*************************************************************************************************************************************************************/
@@ -76,19 +70,16 @@ void loop(void)
     If handleClient detects new requests,
     it will automatically execute the right functions that we specified in the setup.*/
   server.handleClient();
-  if (!client.connected())
+
+  vidMqttConnect();
+
+  if (NonBlock20Sec.vidIsItTime())
   {
-    vidMqttReconnect();
+    NtpRequestTime();
+    GetRestStart();
   }
-  else 
-  {
-    client.subscribe(USERNAME PREAMBLE ON_OFF_TOPIC, 1);
-  }
- if (NtpRequester.vidIsItTime())
- {
-  NtpRequestTime();
- }
-    client.loop();
+
+  MDNS.update();
 }
 
 

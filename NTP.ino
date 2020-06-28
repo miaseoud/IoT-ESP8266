@@ -2,7 +2,8 @@
 #include "NTP.h"
 int alarmmins = 1000000;
 int mins;
-TimeCheck NtpRequester(30000);
+TimeCheck NonBlock20Sec(20000);
+TimeCheck NonBlock5Sec(5000);
 unsigned long sendNTPpacket(IPAddress& address)
 {
   Serial.println("sending NTP packet...");
@@ -26,7 +27,7 @@ unsigned long sendNTPpacket(IPAddress& address)
 int NtpRequestTime (void)
 {
   sendNTPpacket(timeServer); // send an NTP packet to a time server
-  delay(1000);
+  delay(500);
 
   int cb = udp.parsePacket();
   if (!cb) {
@@ -41,28 +42,22 @@ int NtpRequestTime (void)
     const unsigned long seventyYears = 2208985200UL;
     unsigned long epoch = secsSince1900 - seventyYears;
 
+    int hours=((epoch  % 86400L) / 3600);
+    int mins = ((epoch  % 3600) / 60);
+    int seconds= (epoch % 60);
     Serial.print("Time is ");
-    Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
-    int mins = ((epoch   % 86400L) / 3600) * 60;
+    Serial.print(hours);
     Serial.print(':');
-    if ( ((epoch % 3600) / 60) < 10 ) {
-      // In the first 10 minutes of each hour, we'll want a leading '0'
+    if ( mins < 10 )
       Serial.print('0');
-    }
-    Serial.print((epoch  % 3600) / 60); // print the minute (3600 equals secs per minute)
-    mins = mins + ((epoch  % 3600) / 60);
+    Serial.print(mins); 
     Serial.print(':');
-    if ( (epoch % 60) < 10 ) {
-      // In the first 10 seconds of each minute, we'll want a leading '0'
+    if ( seconds  < 10 ) // In the first 10 seconds of each minute, we'll want a leading '0'    
       Serial.print('0');
-    }
-    Serial.println(epoch % 60); // print the second
-    //Serial.print("Time in minutes=");
-   // Serial.println(mins);
-    return mins;
+    Serial.println(seconds);
+    return hours*60 + mins;
   }
 }
-
 
 void vidCheckAlarm (void)
 {
