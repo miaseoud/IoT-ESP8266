@@ -1,16 +1,23 @@
+#include "mainHTML.h"
+  
   /*************************************************************************************/
   /*---------------------------------- Called on "ON" ---------------------------------*/
   /**************************************************************************************/
 void handleOn() {
-  digitalWrite(led, 1);
+
   server.send(200, "text/html", form);
+    Serial.print("Publish Status:");
+    Serial.println (client.publish(USERNAME PREAMBLE ON_OFF_TOPIC, "ON"));
+
 }
   /*************************************************************************************/
   /*---------------------------------- Called on "OFF"  ---------------------------------*/
   /**************************************************************************************/
 void handleOff() {
-  digitalWrite(led, 0);
+
   server.send(200, "text/html", form);
+      Serial.print("Publish Status:");
+    Serial.println (client.publish(USERNAME PREAMBLE ON_OFF_TOPIC, "OFF"));
 }
  /*************************************************************************************/
  /*----------------------------- Called on "Cancel Alarm"  ----------------------------*/
@@ -25,10 +32,12 @@ void handleCancel() {
   /**************************************************************************************/
 void handleAlarm() {
   server.send(200, "text/html", form);
-  int alarmint  = server.arg("alarm").toInt();
-  Serial.print("Alarm Set @ ");
+  int alarhour  = server.arg("alarmHour").toInt();
+  int alarmint  = server.arg("alarmMint").toInt();
+  Serial.print("Alarm Set for ");
+  Serial.print(alarhour);
+  Serial.print(":");
   Serial.print(alarmint);
-  alarmmins = (alarmint / 100) * 60 + alarmint % 100;
-  Serial.print("      Alarm in minutes=");
-  Serial.println(alarmmins);
+  Serial.println ();
+  alarmmins = alarhour* 60 + alarmint;
 }

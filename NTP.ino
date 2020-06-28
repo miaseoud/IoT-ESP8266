@@ -1,10 +1,14 @@
+#include <WiFiUdp.h>
+#include "NTP.h"
+int alarmmins = 1000000;
+int mins;
+TimeCheck NtpRequester(30000);
 unsigned long sendNTPpacket(IPAddress& address)
 {
   Serial.println("sending NTP packet...");
   // set all bytes in the buffer to 0
   memset(packetBuffer, 0, NTP_PACKET_SIZE);
   // Initialize values needed to form NTP request
-  // (see URL above for details on the packets)
   packetBuffer[0] = 0b11100011;   // LI, Version, Mode
   packetBuffer[1] = 0;     // Stratum, or type of clock
   packetBuffer[2] = 6;     // Polling Interval
@@ -19,7 +23,8 @@ unsigned long sendNTPpacket(IPAddress& address)
   udp.endPacket();
 }
 /**********************************************************************************************/
-int requestTime (void) {
+int NtpRequestTime (void)
+{
   sendNTPpacket(timeServer); // send an NTP packet to a time server
   delay(1000);
 
@@ -36,7 +41,7 @@ int requestTime (void) {
     const unsigned long seventyYears = 2208985200UL;
     unsigned long epoch = secsSince1900 - seventyYears;
 
-    Serial.print("Munich time is ");       // UTC is the time at Greenwich Meridian (GMT)
+    Serial.print("Time is ");
     Serial.print((epoch  % 86400L) / 3600); // print the hour (86400 equals secs per day)
     int mins = ((epoch   % 86400L) / 3600) * 60;
     Serial.print(':');
@@ -52,8 +57,41 @@ int requestTime (void) {
       Serial.print('0');
     }
     Serial.println(epoch % 60); // print the second
-    Serial.print("Time in minutes=");
-    Serial.println(mins);
+    //Serial.print("Time in minutes=");
+   // Serial.println(mins);
     return mins;
+  }
+}
+
+
+void vidCheckAlarm (void)
+{
+    mins = NtpRequestTime();
+    /*------------------------------------ Check ALARM ----------------------------------------------*/
+    if (mins >= alarmmins) { //mins=minutes from 0:00 to current time
+      Serial.println("Activate Alarm");//Alert set time is now
+    }
+  }
+
+void vidNtpInit (void)
+{
+  Serial.println("Starting UDP for NTP requests");
+  udp.begin(localPort);
+  //Serial.print("Local port: ");
+  //Serial.println(udp.localPort());
+}
+
+
+bool TimeCheck:: vidIsItTime (void)
+{
+  if ((millis() - previousMillis) > Interval)
+  {
+    //In order to not use request NTP continuisly
+    previousMillis = millis();
+    return 1;
+  }
+  else
+  {
+    return 0;
   }
 }
