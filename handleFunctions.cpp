@@ -1,5 +1,22 @@
 #include "mainHTML.h"
-  
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <HTTPClient.h>
+#include <MqttFunc.h>
+/*------------------------MQTT--------------------*/
+#include <PubSubClient.h>
+/*-----------------------------------------------------*/
+#include "NTP.h"
+#include "WebServ.h"
+extern WebServer server;
+extern PubSubClient client;
+extern int alarmmins;
+
+void handle() {
+server.send(200, "text/html", form);
+}
   /*************************************************************************************/
   /*---------------------------------- Called on "ON" ---------------------------------*/
   /**************************************************************************************/
@@ -8,6 +25,7 @@ void handleOn() {
   server.send(200, "text/html", form);
     Serial.print("Publish Status:");
     Serial.println (client.publish(USERNAME PREAMBLE ON_OFF_TOPIC, "ON"));
+    digitalWrite(23, LOW);
 
 }
   /*************************************************************************************/
@@ -18,6 +36,7 @@ void handleOff() {
   server.send(200, "text/html", form);
       Serial.print("Publish Status:");
     Serial.println (client.publish(USERNAME PREAMBLE ON_OFF_TOPIC, "OFF"));
+    digitalWrite(23, HIGH);
 }
  /*************************************************************************************/
  /*----------------------------- Called on "Cancel Alarm"  ----------------------------*/

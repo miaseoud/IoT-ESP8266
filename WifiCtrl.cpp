@@ -2,7 +2,12 @@
 /***********************************************************************************************************************************/
 /*-------------------------------------------------------WiFi SSID & Password----------------------------------------------------*/
 /***********************************************************************************************************************************/
-char ssid[] = "Ray-Ban 2";           //   network SSID
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+
+char ssid[] = "";           //   network SSID
 char pass[] = "";        //   network passord
 /***********************************************************************************************************************************/
 /*-------------------------------------------------------Access Point Settings----------------------------------------------------*/
@@ -31,7 +36,7 @@ boolean bConnectWiFi (void)
   Serial.print("Connecting to Wi-Fi ");
   WiFi.begin(ssid, pass);
   /* ---- Wait for connection to establish ----*/
-  for (int tries = 0; (WiFi.status() != WL_CONNECTED) && tries < 20; tries++) {
+  for (int tries = 0; (WiFi.status() != WL_CONNECTED) && tries < 10; tries++) {
     delay(500);
     Serial.print(". ");
   }
@@ -48,12 +53,13 @@ boolean bConnectWiFi (void)
 
 void vidStartMDns(void)
 {
-  if (!MDNS.begin("esp8266")) {             // Start the mDNS responder for esp8266.local
-    Serial.println("Error setting up MDNS responder!");
-  }
-  else
-  {
+  
+ if (!MDNS.begin("esp32")) {
+        Serial.println("Error setting up MDNS responder!");
+       // while(1) {
+         //   delay(1000);
+        //}
+    }
+   // MDNS.addService("http", "tcp", 80);
     Serial.println("mDNS responder started");
-    
-  }
 }

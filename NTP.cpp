@@ -1,5 +1,12 @@
 #include <WiFiUdp.h>
 #include "NTP.h"
+WiFiUDP udp;
+unsigned int localPort = 2390;      // local port to listen for UDP packets
+IPAddress timeServer(129, 6, 15, 28); // time.nist.gov NTP server
+const int NTP_PACKET_SIZE = 48;
+byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
+ // NTP time stamp is in the first 48 bytes of the message
+
 int alarmmins = 1000000;
 int mins;
 TimeCheck NonBlock20Sec(20000);

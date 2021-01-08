@@ -8,17 +8,22 @@
    readings whenever the readings differ, to the topic "sensor".
    The ESP8266 is subscribed to a MQTT topic "OnOff" that controls the GPIO2 as well
 */
+#include <Arduino.h>
 /*-------------------Arduino Libraries-----------------*/
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
-#include <WiFiClient.h>
-#include <ESP8266HTTPClient.h>
+#include <WebServer.h>
+#include <ESPmDNS.h>
+#include <HTTPClient.h>
+#include <WifiCtrl.h>
+#include <WebServ.h>
+#include <MqttFunc.h>
+#include <GetRESTful.h>
 /*------------------------MQTT--------------------*/
 #include <PubSubClient.h>
 /*-----------------------------------------------------*/
 #include "NTP.h"
+
 #define interval  5000
 
 unsigned int valueStr[5];
@@ -31,7 +36,7 @@ bool OnOffStatus = 0;
 /*********************************************************************************************************************************/
 #define bWIFI_CONNECTED 1
 extern PubSubClient client;
-extern ESP8266WebServer server;
+extern WebServer server;
 extern TimeCheck NonBlock20Sec;
 extern TimeCheck NonBlock5Sec;
 /*************************************************************************************************************************************************************/
@@ -59,13 +64,14 @@ void setup(void)
   /*------------------------------------ Start HTML Web Server for UI ------------------------------------*/
   vidStartMDns();
   vidWebServerInit();
+  MDNS.addService("http", "tcp", 80);
 }
 /*************************************************************************************************************************************************************/
 /*------------------------------------------------------------------------ VOID LOOP ------------------------------------------------------------------------*/
 /*************************************************************************************************************************************************************/
 void loop(void)
 {
-  yield();
+  
   /*During the loop, we constantly check if a new HTTP request is received by running server.handleClient .
     If handleClient detects new requests,
     it will automatically execute the right functions that we specified in the setup.*/
@@ -78,8 +84,8 @@ void loop(void)
     NtpRequestTime();
     GetRestStart();
   }
-
-  MDNS.update();
+yield();
+  //MDNS.update();
 }
 
 
