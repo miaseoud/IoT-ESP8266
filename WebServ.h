@@ -1,5 +1,5 @@
 #ifndef WebServ_H
 #define WebServ_H
-void vidWebServerInit ();
+void vidStationWebServerInit ();
 extern const int led;
 #endif

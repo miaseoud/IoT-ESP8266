@@ -14,8 +14,12 @@ extern WebServer server;
 extern PubSubClient client;
 extern int alarmmins;
 
-void handle() {
+void handleStation() {
 server.send(200, "text/html", form);
+}
+
+void handleAP() {
+server.send(200, "text/html", formAP);
 }
   /*************************************************************************************/
   /*---------------------------------- Called on "ON" ---------------------------------*/
@@ -59,4 +63,13 @@ void handleAlarm() {
   Serial.print(alarmint);
   Serial.println ();
   alarmmins = alarhour* 60 + alarmint;
+}
+
+
+void handlePOT()
+{
+  static unsigned char u8testCount = 0;
+  u8testCount++;
+ String POTval = String(u8testCount);
+ server.send(200, "text/plane", POTval);
 }

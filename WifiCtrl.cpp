@@ -9,10 +9,12 @@
 
 char ssid[] = "";           //   network SSID
 char pass[] = "";        //   network passord
+
+bool bWifiMode;
 /***********************************************************************************************************************************/
 /*-------------------------------------------------------Access Point Settings----------------------------------------------------*/
 /***********************************************************************************************************************************/
-const char *ssidap = "ESP AP";
+const char *ssidap = "ESP32 AccessPoint";
 const char *passwordap = "anypassword";
 IPAddress  apIP (192, 168, 0, 200);
 /*******************************************************************************************************************************/
@@ -20,14 +22,11 @@ IPAddress  apIP (192, 168, 0, 200);
 void vidStartAcessPoint (void)
 {
     delay(1000);
-    WiFi.mode(WIFI_AP_STA);
-    WiFi.softAPConfig(apIP, apIP, IPAddress(255, 255, 255, 0));
-    WiFi.softAP(ssidap, passwordap);
-    IPAddress myIP = WiFi.softAPIP();
-    Serial.println("");
-    Serial.println("Not connected to WiFI");
+    WiFi.mode(WIFI_AP);
+    WiFi.softAP(ssidap);
+    Serial.println("AP Mode Started");
     Serial.print("AP IP address: ");
-    Serial.println(myIP);
+    //Serial.println(myIP);
 }
 
 boolean bConnectWiFi (void)
@@ -54,12 +53,18 @@ boolean bConnectWiFi (void)
 void vidStartMDns(void)
 {
   
- if (!MDNS.begin("esp32")) {
+ if (!MDNS.begin("esp32"))
+  {
         Serial.println("Error setting up MDNS responder!");
        // while(1) {
          //   delay(1000);
         //}
     }
    // MDNS.addService("http", "tcp", 80);
-    Serial.println("mDNS responder started");
+   else
+   {
+     Serial.println("mDNS responder started");
+   }
+   MDNS.addService("http", "tcp", 80);
 }
+    

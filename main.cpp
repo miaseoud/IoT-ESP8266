@@ -51,41 +51,48 @@ void setup(void)
   /**************************************************************************************/
   if ( bConnectWiFi() == bWIFI_CONNECTED )
   {
+    bWifiMode = WIFI_STATION_MODE;
     vidNtpInit();
     vidMqttInit();
+    vidStationWebServerInit();
+    
   }
   /*************************************************************************************/
   /*------------------------------- Create Access Point -------------------------------*/
   /**************************************************************************************/
   else
   {
+    bWifiMode = WIFI_AP_MODE;
     vidStartAcessPoint();
   }
   /*------------------------------------ Start HTML Web Server for UI ------------------------------------*/
   vidStartMDns();
-  vidWebServerInit();
-  MDNS.addService("http", "tcp", 80);
 }
+  
 /*************************************************************************************************************************************************************/
 /*------------------------------------------------------------------------ VOID LOOP ------------------------------------------------------------------------*/
 /*************************************************************************************************************************************************************/
 void loop(void)
 {
-  
+  //MDNS.update();
   /*During the loop, we constantly check if a new HTTP request is received by running server.handleClient .
     If handleClient detects new requests,
     it will automatically execute the right functions that we specified in the setup.*/
   server.handleClient();
 
-  vidMqttConnect();
+  
 
-  if (NonBlock20Sec.vidIsItTime())
+  if (bWifiMode == WIFI_STATION_MODE)
   {
-    NtpRequestTime();
-    GetRestStart();
-  }
-yield();
-  //MDNS.update();
+    vidMqttConnect();
+    if (NonBlock20Sec.vidIsItTime())
+    {
+      NtpRequestTime();
+      GetRestStart();
+    }
+  } 
+  yield();
+  
 }
 
 
