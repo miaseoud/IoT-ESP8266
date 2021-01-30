@@ -2,10 +2,13 @@
 /***********************************************************************************************************************************/
 /*-------------------------------------------------------WiFi SSID & Password----------------------------------------------------*/
 /***********************************************************************************************************************************/
+#include <WifiCtrl.h>
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <WebServer.h>
 #include <ESPmDNS.h>
+
+enum wirelessState wifiState;
 
 char ssid[] = "";           //   network SSID
 char pass[] = "";        //   network passord
@@ -19,15 +22,7 @@ const char *passwordap = "anypassword";
 IPAddress  apIP (192, 168, 0, 200);
 /*******************************************************************************************************************************/
 
-void vidStartAcessPoint (void)
-{
-    delay(1000);
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(ssidap);
-    Serial.println("AP Mode Started");
-    Serial.print("AP IP address: ");
-    //Serial.println(myIP);
-}
+
 
 boolean bConnectWiFi (void)
 {

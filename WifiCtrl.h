@@ -1,9 +1,16 @@
 #ifndef WiFiCtrl_H
 #define WiFiCtrl_H
-#define WIFI_AP_MODE 1
-#define WIFI_STATION_MODE 0
 
+#include <Arduino.h>
+
+enum wirelessState {stateConnect,stateStation,stateAccessPoint};
+
+extern enum wirelessState wifiState;
 extern bool bWifiMode;
+
+extern const char *ssidap;
+extern const char *passwordap;
+
 
 void vidStartAcessPoint (void);
 boolean bConnectWiFi (void);

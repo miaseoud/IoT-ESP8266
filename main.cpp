@@ -45,28 +45,10 @@ extern TimeCheck NonBlock5Sec;
 void setup(void)
 {
   Serial.begin(9600); //setup Serial communication
-  delay(500);
-  /*************************************************************************************/
-  /*---------------------------------- Coonect to Wifi ---------------------------------*/
-  /**************************************************************************************/
-  if ( bConnectWiFi() == bWIFI_CONNECTED )
-  {
-    bWifiMode = WIFI_STATION_MODE;
-    vidNtpInit();
-    vidMqttInit();
-    vidStationWebServerInit();
-    
-  }
-  /*************************************************************************************/
-  /*------------------------------- Create Access Point -------------------------------*/
-  /**************************************************************************************/
-  else
-  {
-    bWifiMode = WIFI_AP_MODE;
-    vidStartAcessPoint();
-  }
-  /*------------------------------------ Start HTML Web Server for UI ------------------------------------*/
-  vidStartMDns();
+  delay(200);
+
+  wifiState = stateConnect;
+
 }
   
 /*************************************************************************************************************************************************************/
@@ -74,25 +56,62 @@ void setup(void)
 /*************************************************************************************************************************************************************/
 void loop(void)
 {
+
+  switch (wifiState)
+  {
+  /*************************************************************************************/
+  /*-------------------------- Webserver Station Mode ---------------------------------*/
+  /**************************************************************************************/
+    case stateStation:
+    {
+      server.handleClient();
+      vidMqttConnect();
+      if (NonBlock20Sec.vidIsItTime())
+      {
+        NtpRequestTime();
+        GetRestStart();
+      }
+      yield();
+    }
+    break;
+  /*************************************************************************************/
+  /*---------------------------------- Coonect to Wifi ---------------------------------*/
+  /**************************************************************************************/
+    case stateConnect:
+    {
+      if ( bConnectWiFi() == bWIFI_CONNECTED )
+      {
+        wifiState = stateStation;
+        vidNtpInit();
+        vidMqttInit();
+        vidStationWebServerInit();
+        vidStartMDns();
+      }
+    else
+      {
+        wifiState = stateAccessPoint;
+      }
+  
+  }
+  break;
+  /*************************************************************************************/
+  /*------------------------------- Create Access Point -------------------------------*/
+  /**************************************************************************************/
+    case stateAccessPoint:
+    {
+      WiFi.mode(WIFI_AP);
+      WiFi.softAP(ssidap);
+      vidApWebServerInit ();
+      Serial.println("AP Mode Started");
+      vidStartMDns();
+      
+    }
+    break;
+
+  }
+}
+/***************************************************************************************/
   //MDNS.update();
   /*During the loop, we constantly check if a new HTTP request is received by running server.handleClient .
     If handleClient detects new requests,
     it will automatically execute the right functions that we specified in the setup.*/
-  server.handleClient();
-
-  
-
-  if (bWifiMode == WIFI_STATION_MODE)
-  {
-    vidMqttConnect();
-    if (NonBlock20Sec.vidIsItTime())
-    {
-      NtpRequestTime();
-      GetRestStart();
-    }
-  } 
-  yield();
-  
-}
-
-

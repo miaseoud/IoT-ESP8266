@@ -70,8 +70,9 @@ void vidCheckAlarm (void)
 {
     mins = NtpRequestTime();
     /*------------------------------------ Check ALARM ----------------------------------------------*/
-    if (mins >= alarmmins) { //mins=minutes from 0:00 to current time
-      Serial.println("Activate Alarm");//Alert set time is now
+    if (mins >= alarmmins)
+    { //mins=minutes from 0:00 to current time
+        Serial.println("Activate Alarm");//Alert set time is now
     }
   }
 
